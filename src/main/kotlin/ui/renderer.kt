@@ -8,9 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import scene.Rocket
+import scene.Scene
+import utils.middleX
 
 private const val TARGET_RADIUS = 50f
 
@@ -23,14 +27,22 @@ fun Renderer(scene: Scene) {
 
 @Composable
 private fun DrawRocket(rocket: Rocket) {
-    val position = rocket.position.collectAsState()
-
     Canvas(modifier = Modifier.fillMaxSize()) {
-        drawRect(
-            color = Color.White,
-            topLeft = Offset(position.value.x.toFloat() - (25 / 2), position.value.y.toFloat()),
-            size = Size(Rocket.WIDTH, Rocket.HEIGHT)
-        )
+        println("rocket digrees: ${rocket.getDirection()}")
+        rotate(
+            degrees = rocket.getDirection().toFloat(),
+        ) {
+            drawRect(
+                color = Color.Yellow,
+                topLeft = Offset(rocket.position.x, rocket.position.y),
+                size = Size(Rocket.WIDTH, Rocket.HEIGHT)
+            )
+            drawCircle(
+                color = Color.Cyan,
+                center = Offset(rocket.position.x + (Rocket.WIDTH / 2), rocket.position.y),
+                radius = Rocket.WIDTH
+            )
+        }
     }
 }
 
@@ -40,7 +52,7 @@ private fun DrawTarget() {
         drawCircle(
             color = Color.Green,
             radius = TARGET_RADIUS,
-            center = Offset(size.width / 2, 100f)
+            center = Offset(middleX(), 100f)
         )
     }
 }

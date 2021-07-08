@@ -7,6 +7,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import scene.Scene
 
 fun main() = Window(
     "Compose Rockets"
@@ -17,7 +18,7 @@ fun main() = Window(
         val width = LocalAppWindow.current.width * density
         val height = LocalAppWindow.current.height * density
 
-        scene = Scene(width.toInt(), height.toInt())
+        scene = Scene(width, height)
         scene.setup()
     }
 

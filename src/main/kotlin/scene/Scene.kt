@@ -1,13 +1,13 @@
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+package scene
+
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
-class Scene(val width: Int, val height: Int) {
+class Scene(private val width: Float, private val height: Float) {
 
     private val sceneScope = CoroutineScope(Dispatchers.IO)
+    private var sceneJob: Job? = null
 
     private val _ticks = MutableStateFlow(0)
     val ticks = _ticks.asStateFlow()
@@ -16,7 +16,8 @@ class Scene(val width: Int, val height: Int) {
     private set
 
     fun setup() {
-        rocket.setPosition(Vector2(width / 2, height - 100))
+        rocket.reset(width / 2, height)
+//        rocket.setDirection(Vector2(0f, 1f))
         start()
     }
 
@@ -25,11 +26,10 @@ class Scene(val width: Int, val height: Int) {
     }
 
     fun start() {
-        sceneScope.launch {
-            while (ticks.value < GAME_TICKS_LIMIT) {
+        sceneJob = sceneScope.launch {
+            while (isActive) {
                 if (ticks.value == GAME_TICKS_LIMIT - 1) {
                     reset()
-                    start()
                 }
 
                 rocket.fly()
@@ -39,9 +39,13 @@ class Scene(val width: Int, val height: Int) {
         }
     }
 
+    fun stop() {
+        sceneJob?.cancel()
+        sceneJob = null
+    }
+
     fun reset() {
-        rocket = Rocket()
-        rocket.setPosition(Vector2(width / 2, height - 100))
+        rocket.reset(width / 2, height)
 
         _ticks.value = 0
     }
