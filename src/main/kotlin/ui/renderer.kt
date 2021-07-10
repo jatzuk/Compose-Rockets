@@ -1,7 +1,5 @@
-
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,8 +13,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import geometry.toDegrees
-import scene.Rocket
+import models.Rocket
 import scene.Scene
+import scene.Stats
 import utils.middleX
 
 private const val TARGET_RADIUS = 50f
@@ -24,22 +23,20 @@ private const val TARGET_RADIUS = 50f
 @Composable
 fun Renderer(scene: Scene) {
     DrawTarget()
-    DrawGameTick(scene.ticks.collectAsState().value)
     scene.rockets.forEach { rocket -> DrawRocket(rocket) }
+    DrawStats(scene.stats)
 }
 
 @Composable
 private fun DrawRocket(rocket: Rocket) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val degrees = rocket.velocity.heading().toDegrees().toFloat()
-        println("degrees: $degrees")
         translate(rocket.position.x, rocket.position.y) {
             rotate(
-                degrees = degrees,
+                degrees = rocket.velocity.heading().toDegrees().toFloat(),
                 pivot = Offset.Zero
             ) {
                 drawRect(
-                    color = Color.Yellow,
+                    color = if (rocket.isAlive) Color.Yellow else Color.Red,
                     size = Size(Rocket.WIDTH, Rocket.HEIGHT)
                 )
                 drawCircle(
@@ -64,14 +61,57 @@ private fun DrawTarget() {
 }
 
 @Composable
-private fun DrawGameTick(gameTick: Int) {
-    Text(
+private fun DrawStats(stats: Stats) {
+    Column(
         modifier = Modifier
-            .offset(10.dp, 10.dp),
-        text = "tick #$gameTick",
+            .fillMaxHeight()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        DisplayGameTick(stats.ticks.collectAsState().value)
+        DisplayAliveCount(stats.aliveRockets.collectAsState().value)
+        DisplayDeathCount(stats.deathRockets.collectAsState().value)
+        DisplayPopulation(stats.populationCount.collectAsState().value)
+    }
+}
+
+@Composable
+private fun DisplayGameTick(gameTick: Int) {
+    DrawText(
+        text = "tick # $gameTick / ${Scene.GAME_TICKS_LIMIT}"
+    )
+}
+
+@Composable
+private fun DisplayAliveCount(count: Int) {
+    DrawText(
+        text = "alive: $count",
+        textColor = Color.Green
+    )
+}
+
+@Composable
+private fun DisplayDeathCount(count: Int) {
+    DrawText(
+        text = "death: $count",
+        textColor = Color.Red
+    )
+}
+
+@Composable
+private fun DisplayPopulation(count: Int) {
+    DrawText(
+        text = "population # $count"
+    )
+}
+
+@Composable
+private fun DrawText(text: String, textColor: Color = Color.White) {
+    Text(
+        text = text,
         style = TextStyle(
-            color = Color.White,
-            fontSize = 24.sp
+            color = textColor,
+            fontSize = 18.sp
         )
     )
 }
