@@ -32,7 +32,7 @@ data class Vector2(var x: Float, var y: Float) {
     fun limit(n: Int): Vector2 {
         val magnitude = magnitude()
         if (magnitude > n * n) {
-            return Vector2(x, y).normalized()
+            return Vector2(x, y) * n
         }
 
         return this
