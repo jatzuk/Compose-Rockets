@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -9,9 +10,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import geometry.toDegrees
 import scene.Rocket
 import scene.Scene
 import utils.middleX
@@ -22,26 +25,29 @@ private const val TARGET_RADIUS = 50f
 fun Renderer(scene: Scene) {
     DrawTarget()
     DrawGameTick(scene.ticks.collectAsState().value)
-    DrawRocket(scene.rocket)
+    scene.rockets.forEach { rocket -> DrawRocket(rocket) }
 }
 
 @Composable
 private fun DrawRocket(rocket: Rocket) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        println("rocket digrees: ${rocket.getDirection()}")
-        rotate(
-            degrees = rocket.getDirection().toFloat(),
-        ) {
-            drawRect(
-                color = Color.Yellow,
-                topLeft = Offset(rocket.position.x, rocket.position.y),
-                size = Size(Rocket.WIDTH, Rocket.HEIGHT)
-            )
-            drawCircle(
-                color = Color.Cyan,
-                center = Offset(rocket.position.x + (Rocket.WIDTH / 2), rocket.position.y),
-                radius = Rocket.WIDTH
-            )
+        val degrees = rocket.velocity.heading().toDegrees().toFloat()
+        println("degrees: $degrees")
+        translate(rocket.position.x, rocket.position.y) {
+            rotate(
+                degrees = degrees,
+                pivot = Offset.Zero
+            ) {
+                drawRect(
+                    color = Color.Yellow,
+                    size = Size(Rocket.WIDTH, Rocket.HEIGHT)
+                )
+                drawCircle(
+                    center = Offset(Rocket.WIDTH / 2f, 0f),
+                    color = Color.Cyan,
+                    radius = Rocket.WIDTH
+                )
+            }
         }
     }
 }

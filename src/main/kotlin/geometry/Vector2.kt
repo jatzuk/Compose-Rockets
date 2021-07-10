@@ -7,13 +7,21 @@ data class Vector2(var x: Float, var y: Float) {
 
     operator fun plus(vector2: Vector2) = Vector2(x + vector2.x, y + vector2.y)
 
+    operator fun minus(vector2: Vector2) = Vector2(x - vector2.x, y - vector2.y)
+
+    operator fun times(n: Int) = Vector2(x * n, y * n)
+
+    operator fun div(n: Int) = Vector2(x / n, y / n)
+
     fun normalized(): Vector2 {
-        val nX = if (x != 0f) x / magnitude() else 1f
-        val nY = if (y != 0f) y / magnitude() else 1f
-        return Vector2(nX, nY)
+        val m = magnitude()
+        return if (m != 0) Vector2(x / m, y / m) else this
     }
 
-    fun magnitude() = sqrt((x * x).toDouble() + (y * y).toDouble()).toFloat()
+    fun magnitude() = sqrt((x * x) + (y * y)).toInt()
 
-    fun radians() = atan2(y, x) / Math.PI * 180
+    /**
+     * @return rotation in radians
+     * */
+    fun heading() = atan2(y, x)
 }

@@ -4,6 +4,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+private const val ROCKETS_SIZE = 50
+
 class Scene(private val width: Float, private val height: Float) {
 
     private val sceneScope = CoroutineScope(Dispatchers.IO)
@@ -12,12 +14,10 @@ class Scene(private val width: Float, private val height: Float) {
     private val _ticks = MutableStateFlow(0)
     val ticks = _ticks.asStateFlow()
 
-    var rocket = Rocket()
-    private set
+    val rockets = Array(ROCKETS_SIZE) { Rocket() }
 
     fun setup() {
-        rocket.reset(width / 2, height)
-//        rocket.setDirection(Vector2(0f, 1f))
+        reset()
         start()
     }
 
@@ -32,7 +32,7 @@ class Scene(private val width: Float, private val height: Float) {
                     reset()
                 }
 
-                rocket.fly()
+                rockets.forEach { rocket -> rocket.fly() }
                 tick()
                 delay(TICK_RATIO)
             }
@@ -45,14 +45,14 @@ class Scene(private val width: Float, private val height: Float) {
     }
 
     fun reset() {
-        rocket.reset(width / 2, height)
+        rockets.forEach { rocket -> rocket.reset(width / 2, height) }
 
         _ticks.value = 0
     }
 
     companion object {
 
-         const val GAME_TICKS_LIMIT = 1_000
-         const val TICK_RATIO = 1000L / 60
+        const val GAME_TICKS_LIMIT = 1_000
+        const val TICK_RATIO = 1000L / 60
     }
 }
