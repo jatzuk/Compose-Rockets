@@ -1,4 +1,4 @@
-package geometry
+package math
 
 import kotlin.math.atan2
 import kotlin.math.sqrt

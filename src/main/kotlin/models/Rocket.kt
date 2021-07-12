@@ -1,6 +1,6 @@
 package models
 
-import geometry.Vector2
+import math.Vector2
 import scene.Scene
 
 class Rocket {

@@ -1,7 +1,7 @@
 package models
 
-import geometry.Vector2
-import geometry.randomVector
+import math.Vector2
+import math.randomVector
 
 class DNA(length: Int, genes: List<Vector2>? = null) {
 

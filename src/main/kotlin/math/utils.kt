@@ -1,4 +1,4 @@
-package geometry
+package math
 
 import kotlin.random.Random
 

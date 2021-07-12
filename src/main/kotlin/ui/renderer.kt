@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import geometry.toDegrees
+import math.toDegrees
 import models.Rocket
 import scene.Scene
 import scene.Stats
