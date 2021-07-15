@@ -1,31 +1,42 @@
 package scene
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import models.Rocket
+import models.Population
 
-class Stats(private val rockets: Array<Rocket>, val ticks: StateFlow<Int>) {
+class Stats(private val population: Population, val ticks: StateFlow<Int>) {
 
-    private val _populationCount = MutableStateFlow(0)
-    val populationCount = _populationCount.asStateFlow()
+    var populationCount = 0
+        private set
 
-    private val _aliveRockets = MutableStateFlow(rockets.size)
-    val aliveRockets = _aliveRockets.asStateFlow()
+    var reachedTarget = 0
+        private set
 
-    private val _deathRockets = MutableStateFlow(0)
-    val deathRockets = _deathRockets.asStateFlow()
+    var bestFitness = 0
+        private set
+
+    var averageFitness = 0
+        private set
+
+    var aliveRockets = 0
+        private set
+
+    var deathRockets = 0
+        private set
 
     fun reset() {
-        _aliveRockets.value = rockets.size
-        _deathRockets.value = 0
+        bestFitness = population.rockets.maxOf { rocket -> rocket.fitness }
+        averageFitness = population.rockets.sumOf { rocket -> rocket.fitness } / population.rockets.size
 
-        _populationCount.value++
+        aliveRockets = population.rockets.size
+        deathRockets = 0
+        reachedTarget = 0
+
+        populationCount++
     }
 
     fun update() {
-        val aliveSize = rockets.count { rocket -> rocket.isAlive }
-        _aliveRockets.value = aliveSize
-        _deathRockets.value = rockets.size - aliveSize
+        aliveRockets = population.rockets.count { rocket -> rocket.isAlive }
+        deathRockets = population.rockets.size - aliveRockets
+        reachedTarget = population.rockets.count { rocket -> rocket.isTargetReached }
     }
 }

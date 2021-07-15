@@ -7,57 +7,64 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import math.toDegrees
+import models.Barrier
 import models.Rocket
+import models.Target
 import scene.Scene
 import scene.Stats
-import utils.middleX
-
-private const val TARGET_RADIUS = 50f
 
 @Composable
 fun Renderer(scene: Scene) {
-    DrawTarget()
-    scene.rockets.forEach { rocket -> DrawRocket(rocket) }
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawTarget(scene.target)
+        scene.population.rockets.forEach { rocket -> drawRocket(rocket) }
+        scene.barriers.forEach { barrier -> drawBarrier(barrier) }
+    }
     DrawStats(scene.stats)
 }
 
-@Composable
-private fun DrawRocket(rocket: Rocket) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        translate(rocket.position.x, rocket.position.y) {
-            rotate(
-                degrees = rocket.velocity.heading().toDegrees().toFloat(),
-                pivot = Offset.Zero
-            ) {
-                drawRect(
-                    color = if (rocket.isAlive) Color.Yellow else Color.Red,
-                    size = Size(Rocket.WIDTH, Rocket.HEIGHT)
-                )
-                drawCircle(
-                    center = Offset(Rocket.WIDTH / 2f, 0f),
-                    color = Color.Cyan,
-                    radius = Rocket.WIDTH
-                )
-            }
+private fun DrawScope.drawRocket(rocket: Rocket) {
+    translate(rocket.position.x, rocket.position.y) {
+        rotate(
+            degrees = rocket.velocity.heading().toDegrees().toFloat(),
+            pivot = Offset.Zero
+        ) {
+            drawRect(
+                color = if (rocket.isAlive) Color.Yellow else Color.Red,
+                alpha = 0.75f,
+                size = Size(Rocket.WIDTH, Rocket.HEIGHT)
+            )
+            drawCircle(
+                center = Offset(Rocket.WIDTH / 2f, 0f),
+                color = Color.Cyan,
+                radius = Rocket.WIDTH
+            )
         }
     }
 }
 
-@Composable
-private fun DrawTarget() {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawCircle(
-            color = Color.Green,
-            radius = TARGET_RADIUS,
-            center = Offset(middleX(), 100f)
+private fun DrawScope.drawBarrier(barrier: Barrier) {
+    translate(barrier.position.x, barrier.position.y) {
+        drawRect(
+            color = Color.Magenta,
+            size = Size(80f, 40f)
         )
     }
+}
+
+private fun DrawScope.drawTarget(target: Target) {
+    drawCircle(
+        color = Color.Green,
+        radius = target.radius,
+        center = Offset(target.position.x, target.position.y)
+    )
 }
 
 @Composable
@@ -69,17 +76,33 @@ private fun DrawStats(stats: Stats) {
         verticalArrangement = Arrangement.Bottom
     ) {
         DisplayGameTick(stats.ticks.collectAsState().value)
-        DisplayAliveCount(stats.aliveRockets.collectAsState().value)
-        DisplayDeathCount(stats.deathRockets.collectAsState().value)
-        DisplayPopulation(stats.populationCount.collectAsState().value)
+        DisplayTargetReachedCount(stats.reachedTarget)
+        DisplayBestFitness(stats.bestFitness)
+        DisplayAverageFitness(stats.averageFitness)
+        DisplayAliveCount(stats.aliveRockets)
+        DisplayDeathCount(stats.deathRockets)
+        DisplayPopulation(stats.populationCount)
     }
 }
 
 @Composable
 private fun DisplayGameTick(gameTick: Int) {
-    DrawText(
-        text = "tick # $gameTick / ${Scene.GAME_TICKS_LIMIT}"
-    )
+    DrawText("tick # $gameTick / ${Scene.GAME_TICKS_LIMIT}")
+}
+
+@Composable
+private fun DisplayTargetReachedCount(count: Int) {
+    DrawText("target reached: $count")
+}
+
+@Composable
+private fun DisplayBestFitness(count: Int) {
+    DrawText("best fitness: $count")
+}
+
+@Composable
+private fun DisplayAverageFitness(count: Int) {
+    DrawText("average fitness: $count")
 }
 
 @Composable
@@ -100,9 +123,7 @@ private fun DisplayDeathCount(count: Int) {
 
 @Composable
 private fun DisplayPopulation(count: Int) {
-    DrawText(
-        text = "population # $count"
-    )
+    DrawText("population # $count")
 }
 
 @Composable

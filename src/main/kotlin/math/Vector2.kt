@@ -24,6 +24,12 @@ data class Vector2(var x: Float, var y: Float) {
 
     fun magnitude() = sqrt((x * x) + (y * y)).toInt()
 
+    fun setMagnitude(length: Float) {
+        val vector2 = normalized() * length
+        x = vector2.x
+        y = vector2.y
+    }
+
     /**
      * @return rotation in radians
      * */

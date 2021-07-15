@@ -1,28 +1,43 @@
 package models
 
 import math.Vector2
+import math.distance
+import math.map
 import scene.Scene
 
-class Rocket {
+class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
 
     var position = Vector2()
+        private set
+
     var velocity = Vector2()
-    var acceleration = Vector2()
+        private set
 
-    private val dna = DNA(Scene.GAME_TICKS_LIMIT)
-
-    private var step = 0
+    private var acceleration = Vector2()
 
     var isAlive = true
+    var isTargetReached = false
 
-    fun fly() {
-        if (isAlive) {
-            applyForce(dna.genes[step++])
-            velocity += acceleration
-            position += velocity
-            acceleration *= 0
-            velocity.limit(4)
-        }
+    var fitness = 0
+        private set
+
+    fun fly(tick: Int) {
+        if (isTargetReached || !isAlive) return
+
+        applyForce(dna.genes[tick])
+        velocity += acceleration
+        position += velocity
+        acceleration *= 0
+        velocity.limit(2)
+
+        if (distance(position, target.position) < target.radius) isTargetReached = true
+    }
+
+    fun calculateFitness() {
+        fitness = map(distance(position, target.position).toInt(), Scene.HEIGHT.toInt()..0, 0..100)
+        if (isTargetReached) fitness += 10
+        if (!isAlive) fitness -= 20
+        fitness = fitness.coerceIn(0..100)
     }
 
     private fun applyForce(force: Vector2) {
@@ -31,9 +46,9 @@ class Rocket {
 
     fun reset(x: Float, y: Float) {
         position = Vector2(x - (WIDTH / 2), y - HEIGHT)
-        step = 0
         velocity *= 0
         isAlive = true
+        isTargetReached = false
     }
 
     fun death() {
