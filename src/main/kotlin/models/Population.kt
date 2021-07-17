@@ -19,8 +19,13 @@ class Population(size: Int, target: Target) {
         for (i in rockets.indices) {
             matingPool.add(rockets[i])
 
-            val presence = (rockets[i].fitness * 0.3).toInt()
+            val presence = (rockets[i].fitness * 0.1).toInt()
             repeat(presence) {
+                matingPool.add(rockets[i])
+            }
+
+            val successors = rockets.filter { rocket -> rocket.isTargetReached }.count()
+            repeat(successors) {
                 matingPool.add(rockets[i])
             }
         }

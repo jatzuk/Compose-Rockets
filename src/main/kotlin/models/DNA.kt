@@ -20,20 +20,24 @@ class DNA(length: Int, genes: List<Vector2>? = null) {
         return DNA(genes.size, newGenes)
     }
 
-    private fun Vector2.mutate(): Vector2 {
-        if (Random.nextFloat() < 0.01) {
-            val vector2 = randomVector(-1.0, 1.0)
-            vector2.setMagnitude(Random.nextFloat() * 2 - 1)
-        }
-        return this
-    }
+    private fun Vector2.mutate() = if (Random.nextFloat() < 0.01)  createPredefinedVector2() else this
 
     private fun createRandom(length: Int): List<Vector2> {
         val genes = mutableListOf<Vector2>()
-        repeat(length) { i ->
-            genes.add(randomVector(-1.0, 1.0))
-            genes[i].setMagnitude(Random.nextFloat())
+        repeat(length) {
+            genes.add(createPredefinedVector2())
         }
         return genes
+    }
+
+    private fun createPredefinedVector2() = randomVector(VECTOR_MIN_VALUE, VECTOR_MAX_VALUE).apply {
+        setMagnitude(VECTOR_MAGNITUDE)
+    }
+
+    private companion object {
+
+        const val VECTOR_MAX_VALUE = 3.0
+        const val VECTOR_MIN_VALUE = -VECTOR_MAX_VALUE
+        const val VECTOR_MAGNITUDE = 0.5f
     }
 }

@@ -35,12 +35,17 @@ data class Vector2(var x: Float, var y: Float) {
      * */
     fun heading() = atan2(y, x)
 
-    fun limit(n: Int): Vector2 {
+    fun limit(n: Int) {
+        val vector2 = limited(n)
+        x = vector2.x
+        y = vector2.y
+    }
+
+    fun limited(n: Int): Vector2 {
         val magnitude = magnitude()
         if (magnitude > n * n) {
             return Vector2(x, y) * n
         }
-
         return this
     }
 }

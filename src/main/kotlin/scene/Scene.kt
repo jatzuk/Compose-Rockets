@@ -37,7 +37,7 @@ class Scene(private val width: Float, private val height: Float) {
         start()
     }
 
-    fun tick() {
+    private fun tick() {
         _ticks.value++
     }
 
@@ -48,20 +48,22 @@ class Scene(private val width: Float, private val height: Float) {
                     reset()
                 }
 
-               population.rockets.forEach { rocket ->
+                population.rockets.forEach { rocket ->
                     rocket.fly(_ticks.value)
                     if (rocket.position.x < 0 || rocket.position.x > width || rocket.position.y < 0 || rocket.position.y > height) {
                         rocket.death()
                         stats.update()
                     }
 
-                   barriers.forEach { barrier ->
-                       if (rocket.position.x == barrier.position.x || barrier.position.y == rocket.position.y) {
-                           rocket.death()
-                           stats.update()
-                       }
-                   }
+                    barriers.forEach { barrier ->
+                        if (rocket.position.x == barrier.position.x || barrier.position.y == rocket.position.y) {
+                            rocket.death()
+                            stats.update()
+                        }
+                    }
                 }
+
+                stats.update()
                 tick()
                 delay(TICK_RATIO)
             }
@@ -87,7 +89,8 @@ class Scene(private val width: Float, private val height: Float) {
         _ticks.value = 0
     }
 
-    private fun resetCheck() = _ticks.value == GAME_TICKS_LIMIT - 1 || stats.aliveRockets == 0
+    private fun resetCheck() =
+        _ticks.value == GAME_TICKS_LIMIT - 1 || population.rockets.all { rocket -> !rocket.isAlive }
 
     companion object {
 
@@ -95,9 +98,9 @@ class Scene(private val width: Float, private val height: Float) {
         const val TICK_RATIO = 1000L / 60
 
         var WIDTH = 0f
-        private set
+            private set
 
         var HEIGHT = 0f
-        private set
+            private set
     }
 }

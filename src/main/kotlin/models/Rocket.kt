@@ -15,6 +15,9 @@ class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
 
     private var acceleration = Vector2()
 
+    private val _path = mutableListOf<Vector2>()
+    val path get() = _path.toList()
+
     var isAlive = true
     var isTargetReached = false
 
@@ -28,7 +31,9 @@ class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
         velocity += acceleration
         position += velocity
         acceleration *= 0
-        velocity.limit(2)
+        velocity.limit(5)
+
+        _path.add(position)
 
         if (distance(position, target.position) < target.radius) isTargetReached = true
     }
@@ -36,7 +41,7 @@ class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
     fun calculateFitness() {
         fitness = map(distance(position, target.position).toInt(), Scene.HEIGHT.toInt()..0, 0..100)
         if (isTargetReached) fitness += 10
-        if (!isAlive) fitness -= 20
+        if (!isAlive) fitness = 0
         fitness = fitness.coerceIn(0..100)
     }
 
@@ -49,6 +54,7 @@ class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
         velocity *= 0
         isAlive = true
         isTargetReached = false
+        _path.clear()
     }
 
     fun death() {
