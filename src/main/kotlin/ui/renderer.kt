@@ -1,52 +1,73 @@
+package ui
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import math.Vector2
 import math.toDegrees
 import models.Barrier
 import models.Rocket
 import models.Target
+import org.jetbrains.skija.IRect
+import org.jetbrains.skija.Image
 import scene.Scene
 import scene.Stats
+import utils.ResourceLoader
 
 @Composable
 fun Renderer(scene: Scene) {
+    val image = remember { ResourceLoader.getRocketImage() }
+    val (width, height) = remember { Rocket.WIDTH to Rocket.HEIGHT }
+
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawTarget(scene.target)
-        scene.population.rockets.forEach { rocket -> drawRocket(rocket) }
+        scene.population.rockets.forEach { rocket -> drawRocket(rocket, image, width.toInt(), height.toInt()) }
         scene.barriers.forEach { barrier -> drawBarrier(barrier) }
     }
     DrawStats(scene.stats)
 }
 
-private fun DrawScope.drawRocket(rocket: Rocket) {
+private fun DrawScope.drawRocket(rocket: Rocket, image: Image, width: Int, height: Int) {
     translate(rocket.position.x, rocket.position.y) {
         rotate(
             degrees = rocket.velocity.heading().toDegrees().toFloat(),
             pivot = Offset.Zero
         ) {
-            drawRect(
-                color = if (rocket.isAlive) Color.Yellow else Color.Red,
-                alpha = 0.75f,
-                size = Size(Rocket.WIDTH, Rocket.HEIGHT)
-            )
-            drawCircle(
-                center = Offset(Rocket.WIDTH / 2f, 0f),
-                color = Color.Cyan,
-                radius = Rocket.WIDTH
-            )
+            drawIntoCanvas { canvas ->
+                canvas.nativeCanvas.drawImageRect(
+                    image,
+                    IRect(-width, -width / 2, width, height).toRect()
+                )
+            }
         }
+    }
+
+    drawRocketPath(rocket.path)
+}
+
+private fun DrawScope.drawRocketPath(path: List<Vector2>) {
+    path.forEach { position ->
+        drawCircle(
+            center = Offset(position.x, position.y),
+            color = Color.Green,
+            alpha = 0.35f,
+            radius = 2f
+        )
     }
 }
 
