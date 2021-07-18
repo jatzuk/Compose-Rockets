@@ -63,7 +63,7 @@ class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
 
     companion object {
 
-        const val WIDTH = 20f
-        const val HEIGHT = WIDTH * 5
+        const val WIDTH = 40f
+        const val HEIGHT = WIDTH * 2
     }
 }

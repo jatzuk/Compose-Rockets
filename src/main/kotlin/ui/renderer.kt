@@ -33,7 +33,7 @@ import utils.ResourceLoader
 @Composable
 fun Renderer(scene: Scene) {
     val rocketImage = remember { ResourceLoader.getRocketImage() }
-    val (rocketWidth, rocketHeight) = remember { Rocket.WIDTH * 2 to Rocket.HEIGHT }
+    val (rocketWidth, rocketHeight) = remember { Rocket.WIDTH to Rocket.HEIGHT }
 
     val targetImage = remember { ResourceLoader.getTargetImage() }
 
