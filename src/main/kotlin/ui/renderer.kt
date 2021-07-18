@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import math.Vector2
 import math.toDegrees
 import models.Rocket
 import models.Target
@@ -60,28 +59,35 @@ fun Renderer(scene: Scene) {
 }
 
 private fun DrawScope.drawRocket(rocket: Rocket, image: Image, width: Int, height: Int) {
-    translate(rocket.position.x, rocket.position.y) {
-        rotate(
-            degrees = rocket.velocity.heading().toDegrees().toFloat(),
-            pivot = Offset.Zero
-        ) {
-            drawIntoCanvas { canvas ->
-                canvas.nativeCanvas.drawImageRect(
-                    image,
-                    IRect(-width, -width / 2, width, height).toRect()
-                )
+    if (rocket.isAlive) {
+        translate(rocket.position.x, rocket.position.y) {
+            rotate(
+                degrees = rocket.velocity.heading().toDegrees().toFloat(),
+                pivot = Offset.Zero
+            ) {
+                drawIntoCanvas { canvas ->
+                    canvas.nativeCanvas.drawImageRect(
+                        image,
+                        IRect(-width, -width / 2, width, height).toRect()
+                    )
+                }
             }
         }
     }
 
-    drawRocketPath(rocket.path)
+    drawRocketPath(rocket)
 }
 
-private fun DrawScope.drawRocketPath(path: List<Vector2>) {
-    path.forEach { position ->
+private fun DrawScope.drawRocketPath(rocket: Rocket) {
+    val color = when {
+        !rocket.isAlive -> Color.Red
+        rocket.isTargetReached -> Color.Yellow
+        else -> Color.Green
+    }
+    rocket.path.forEach { position ->
         drawCircle(
             center = Offset(position.x, position.y),
-            color = Color.Green,
+            color = color,
             alpha = 0.35f,
             radius = 2f
         )
@@ -92,10 +98,7 @@ private fun DrawScope.drawBarrier(barrier: Barrier, textBarrierPaint: NativePain
     translate(barrier.position.x, barrier.position.y) {
         when (barrier) {
             is BlockBarrier -> drawBlockBarrier(barrier)
-            is TextBarrier -> {
-//                drawBlockBarrier2(barrier)
-                drawTextBarrier(barrier, textBarrierPaint)
-            }
+            is TextBarrier -> drawTextBarrier(barrier, textBarrierPaint)
         }
     }
 }
@@ -109,14 +112,6 @@ private fun DrawScope.drawTextBarrier(barrier: TextBarrier, paint: NativePaint) 
             paint
         )
     }
-}
-
-private fun DrawScope.drawBlockBarrier2(barrier: Barrier) {
-    drawRect(
-        color = Color.White,
-        style = Stroke(width = 1f),
-        size = Size(barrier.width.toFloat(), barrier.height.toFloat())
-    )
 }
 
 private fun DrawScope.drawBlockBarrier(barrier: BlockBarrier) {
