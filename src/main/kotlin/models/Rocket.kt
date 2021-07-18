@@ -35,7 +35,7 @@ class Rocket(val target: Target, val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT)) {
 
         _path.add(position)
 
-        if (distance(position, target.position) < target.radius) isTargetReached = true
+        if (distance(position, target.position) <= target.radius) isTargetReached = true
     }
 
     fun calculateFitness() {

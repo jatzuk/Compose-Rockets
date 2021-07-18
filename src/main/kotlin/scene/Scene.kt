@@ -4,9 +4,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import math.Vector2
-import models.Barrier
+import math.rocketBarrier
 import models.Population
 import models.Target
+import models.barriers.TextBarrier
 
 private const val ROCKETS_SIZE = 25
 
@@ -20,9 +21,7 @@ class Scene(private val width: Float, private val height: Float) {
     val target = Target(Vector2())
     val population = Population(ROCKETS_SIZE, target)
     val barriers = listOf(
-        Barrier(Vector2(width / 2 - 100, height / 2 + 70)),
-        Barrier(Vector2(width / 2 + 100, height / 2)),
-        Barrier(Vector2(width / 2, height / 2 - 100)),
+        TextBarrier("Compose Rockets!", 100f, Vector2(width/ 4, 300f)),
     )
 
     val stats = Stats(population, _ticks.asStateFlow())
@@ -44,9 +43,7 @@ class Scene(private val width: Float, private val height: Float) {
     fun start() {
         sceneJob = sceneScope.launch {
             while (isActive) {
-                if (resetCheck()) {
-                    reset()
-                }
+                if (resetCheck()) reset()
 
                 population.rockets.forEach { rocket ->
                     rocket.fly(_ticks.value)
@@ -56,7 +53,8 @@ class Scene(private val width: Float, private val height: Float) {
                     }
 
                     barriers.forEach { barrier ->
-                        if (rocket.position.x == barrier.position.x || barrier.position.y == rocket.position.y) {
+                       val isCollided = rocketBarrier(rocket, barrier)
+                        if (isCollided) {
                             rocket.death()
                             stats.update()
                         }
@@ -78,7 +76,7 @@ class Scene(private val width: Float, private val height: Float) {
     fun reset() {
         target.apply {
 //            radius = Random.nextFloat() * 100
-            position = Vector2(width / 2, radius)
+            position = Vector2(width / 2, radius * 2)
         }
 
         population.evaluate()
@@ -90,12 +88,12 @@ class Scene(private val width: Float, private val height: Float) {
     }
 
     private fun resetCheck() =
-        _ticks.value == GAME_TICKS_LIMIT - 1 || population.rockets.all { rocket -> !rocket.isAlive }
+        _ticks.value == GAME_TICKS_LIMIT - 1 || population.rockets.all { rocket -> !rocket.isAlive || rocket.isTargetReached }
 
     companion object {
 
-        const val GAME_TICKS_LIMIT = 200
-        const val TICK_RATIO = 1000L / 60
+        const val GAME_TICKS_LIMIT = 400
+        const val TICK_RATIO =  1000L / 60
 
         var WIDTH = 0f
             private set

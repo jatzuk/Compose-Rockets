@@ -19,7 +19,7 @@ class Population(size: Int, target: Target) {
         for (i in rockets.indices) {
             matingPool.add(rockets[i])
 
-            val presence = (rockets[i].fitness * 0.1).toInt()
+            val presence = (rockets[i].fitness * PRESENCE_RATIO).toInt()
             repeat(presence) {
                 matingPool.add(rockets[i])
             }
@@ -43,5 +43,10 @@ class Population(size: Int, target: Target) {
             newRockets.add(Rocket(rockets[i].target, child))
         }
         _rockets = newRockets
+    }
+
+    private companion object {
+
+        const val PRESENCE_RATIO = 0.5f
     }
 }

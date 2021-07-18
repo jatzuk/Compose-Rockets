@@ -10,19 +10,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.NativePaint
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import math.Vector2
 import math.toDegrees
-import models.Barrier
 import models.Rocket
 import models.Target
+import models.barriers.Barrier
+import models.barriers.BlockBarrier
+import models.barriers.TextBarrier
 import org.jetbrains.skija.IRect
 import org.jetbrains.skija.Image
 import scene.Scene
@@ -31,13 +32,29 @@ import utils.ResourceLoader
 
 @Composable
 fun Renderer(scene: Scene) {
-    val image = remember { ResourceLoader.getRocketImage() }
-    val (width, height) = remember { Rocket.WIDTH to Rocket.HEIGHT }
+    val rocketImage = remember { ResourceLoader.getRocketImage() }
+    val (rocketWidth, rocketHeight) = remember { Rocket.WIDTH * 2 to Rocket.HEIGHT }
+
+    val targetImage = remember { ResourceLoader.getTargetImage() }
+
+    val textBarrierPaint = remember {
+        Paint().asFrameworkPaint().apply {
+            isAntiAlias = true
+            color = org.jetbrains.skija.Color.makeRGB(41, 132, 252)
+        }
+    }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        drawTarget(scene.target)
-        scene.population.rockets.forEach { rocket -> drawRocket(rocket, image, width.toInt(), height.toInt()) }
-        scene.barriers.forEach { barrier -> drawBarrier(barrier) }
+        drawTarget(scene.target, targetImage)
+        scene.population.rockets.forEach { rocket ->
+            drawRocket(
+                rocket,
+                rocketImage,
+                rocketWidth.toInt(),
+                rocketHeight.toInt()
+            )
+        }
+        scene.barriers.forEach { barrier -> drawBarrier(barrier, textBarrierPaint) }
     }
     DrawStats(scene.stats)
 }
@@ -71,21 +88,59 @@ private fun DrawScope.drawRocketPath(path: List<Vector2>) {
     }
 }
 
-private fun DrawScope.drawBarrier(barrier: Barrier) {
+private fun DrawScope.drawBarrier(barrier: Barrier, textBarrierPaint: NativePaint) {
     translate(barrier.position.x, barrier.position.y) {
-        drawRect(
-            color = Color.Magenta,
-            size = Size(80f, 40f)
+        when (barrier) {
+            is BlockBarrier -> drawBlockBarrier(barrier)
+            is TextBarrier -> {
+//                drawBlockBarrier2(barrier)
+                drawTextBarrier(barrier, textBarrierPaint)
+            }
+        }
+    }
+}
+
+private fun DrawScope.drawTextBarrier(barrier: TextBarrier, paint: NativePaint) {
+    drawIntoCanvas { canvas ->
+        canvas.nativeCanvas.drawTextLine(
+            barrier.textLine,
+            0f,
+            barrier.height.toFloat(),
+            paint
         )
     }
 }
 
-private fun DrawScope.drawTarget(target: Target) {
-    drawCircle(
-        color = Color.Green,
-        radius = target.radius,
-        center = Offset(target.position.x, target.position.y)
+private fun DrawScope.drawBlockBarrier2(barrier: Barrier) {
+    drawRect(
+        color = Color.White,
+        style = Stroke(width = 1f),
+        size = Size(barrier.width.toFloat(), barrier.height.toFloat())
     )
+}
+
+private fun DrawScope.drawBlockBarrier(barrier: BlockBarrier) {
+    drawRect(
+        color = barrier.color,
+        style = Stroke(width = 1f),
+        size = Size(barrier.width.toFloat(), barrier.height.toFloat())
+    )
+}
+
+private fun DrawScope.drawTarget(target: Target, image: Image) {
+    translate(target.position.x - target.radius / 2, target.position.y - target.radius / 2) {
+        drawIntoCanvas { canvas ->
+            canvas.nativeCanvas.drawImageRect(
+                image,
+                IRect(
+                    -(target.radius).toInt(),
+                    -(target.radius).toInt(),
+                    target.radius.toInt() * 2,
+                    target.radius.toInt() * 2
+                ).toRect()
+            )
+        }
+    }
 }
 
 @Composable
@@ -108,7 +163,7 @@ private fun DrawStats(stats: Stats) {
 
 @Composable
 private fun DisplayGameTick(gameTick: Int) {
-    DrawText("tick # $gameTick / ${Scene.GAME_TICKS_LIMIT}")
+    DrawText("tick: $gameTick / ${Scene.GAME_TICKS_LIMIT}")
 }
 
 @Composable
@@ -123,7 +178,7 @@ private fun DisplayBestFitness(count: Int) {
 
 @Composable
 private fun DisplayAverageFitness(count: Int) {
-    DrawText("average fitness: $count")
+    DrawText("avg fitness: $count")
 }
 
 @Composable
@@ -144,7 +199,7 @@ private fun DisplayDeathCount(count: Int) {
 
 @Composable
 private fun DisplayPopulation(count: Int) {
-    DrawText("population # $count")
+    DrawText("population #$count")
 }
 
 @Composable

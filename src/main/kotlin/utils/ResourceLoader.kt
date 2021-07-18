@@ -10,11 +10,16 @@ import javax.imageio.ImageIO
 
 object ResourceLoader {
 
-    private const val ROCKET_PATH = "/img/rocket.png"
+    private const val IMG_PATH = "/img/"
 
-    fun getRocketImage() = Image.makeFromBitmap(loadBitmap(getResourceUrl().path))
+    private const val ROCKET_PATH = "${IMG_PATH}rocket.png"
+    private const val TARGET_PATH = "${IMG_PATH}target.png"
 
-    private fun getResourceUrl() = this::class.java.getResource(ROCKET_PATH)!!
+    fun getRocketImage() = Image.makeFromBitmap(loadBitmap(getResourceUrl(ROCKET_PATH).path))
+
+    fun getTargetImage() = Image.makeFromBitmap(loadBitmap(getResourceUrl(TARGET_PATH).path))
+
+    private fun getResourceUrl(path: String) = this::class.java.getResource(path)!!
 
     private fun loadBitmap(path: String) = bitmapFromByteArray(File(path))
 
