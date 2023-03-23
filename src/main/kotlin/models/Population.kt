@@ -1,52 +1,52 @@
 package models
 
-class Population(size: Int, target: Target) {
+class Population(size: Int, target: Target, private val sceneHeight: Int) {
 
-    private var _rockets = MutableList(size) { Rocket(target) }
-    val rockets get() = _rockets.toList()
+  private var _rockets = MutableList(size) { Rocket(target, sceneHeight = sceneHeight) }
+  val rockets get() = _rockets.toList()
 
-    private val matingPool = mutableListOf<Rocket>()
+  private val matingPool = mutableListOf<Rocket>()
 
-    fun evaluate() {
-        var maxFitness = 0
+  fun evaluate() {
+    var maxFitness = 0
 
-        rockets.forEach { rocket ->
-            rocket.calculateFitness()
-            if (rocket.fitness > maxFitness) maxFitness = rocket.fitness
-        }
-
-        matingPool.clear()
-        for (i in rockets.indices) {
-            matingPool.add(rockets[i])
-
-            val presence = (rockets[i].fitness * PRESENCE_RATIO).toInt()
-            repeat(presence) {
-                matingPool.add(rockets[i])
-            }
-
-            val successors = rockets.filter { rocket -> rocket.isTargetReached }.count()
-            repeat(successors) {
-                matingPool.add(rockets[i])
-            }
-        }
+    rockets.forEach { rocket ->
+      rocket.calculateFitness()
+      if (rocket.fitness > maxFitness) maxFitness = rocket.fitness
     }
 
-    fun selection() {
-        val newRockets = mutableListOf<Rocket>()
-        matingPool.shuffle()
+    matingPool.clear()
+    for (i in rockets.indices) {
+      matingPool.add(rockets[i])
 
-        for (i in rockets.indices) {
-            val firstParent = matingPool.random().dna
-            val secondParent = matingPool.random().dna
+      val presence = (rockets[i].fitness * PRESENCE_RATIO).toInt()
+      repeat(presence) {
+        matingPool.add(rockets[i])
+      }
 
-            val child = firstParent.crossover(secondParent)
-            newRockets.add(Rocket(rockets[i].target, child))
-        }
-        _rockets = newRockets
+      val successors = rockets.filter { rocket -> rocket.isTargetReached }.count()
+      repeat(successors) {
+        matingPool.add(rockets[i])
+      }
     }
+  }
 
-    private companion object {
+  fun selection() {
+    val newRockets = mutableListOf<Rocket>()
+    matingPool.shuffle()
 
-        const val PRESENCE_RATIO = 0.5f
+    for (i in rockets.indices) {
+      val firstParent = matingPool.random().dna
+      val secondParent = matingPool.random().dna
+
+      val child = firstParent.crossover(secondParent)
+      newRockets.add(Rocket(rockets[i].target, child, sceneHeight))
     }
+    _rockets = newRockets
+  }
+
+  private companion object {
+
+    const val PRESENCE_RATIO = 0.5f
+  }
 }

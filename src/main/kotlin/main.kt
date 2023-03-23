@@ -8,27 +8,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import scene.Scene
+import scene.SceneDimensions
 import ui.Renderer
 
 fun main() = Window(
-    "Compose Rockets"
+  "Compose Rockets"
 ) {
-    val scene: Scene
+  val scene: Scene
 
-    with(LocalDensity.current) {
-        val width = LocalAppWindow.current.width * density
-        val height = LocalAppWindow.current.height * density
+  with(LocalDensity.current) {
+    val width = LocalAppWindow.current.width * density
+    val height = LocalAppWindow.current.height * density
+    val sceneDimensions = SceneDimensions(width, height)
 
-        scene = Scene(width, height)
-        scene.setup()
+    scene = Scene(sceneDimensions)
+    scene.setup()
+  }
+
+  MaterialTheme {
+    Box(
+      modifier = Modifier.fillMaxSize()
+        .background(Color.Black)
+    ) {
+      Renderer(scene)
     }
-
-    MaterialTheme {
-        Box(
-            modifier = Modifier.fillMaxSize()
-                .background(Color.Black)
-        ) {
-            Renderer(scene)
-        }
-    }
+  }
 }
