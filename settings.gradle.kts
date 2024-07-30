@@ -1,19 +1,35 @@
+rootProject.name = "ComposeRockets"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
   repositories {
-    google()
-    gradlePluginPortal()
+    google {
+      mavenContent {
+        includeGroupAndSubgroups("androidx")
+        includeGroupAndSubgroups("com.android")
+        includeGroupAndSubgroups("com.google")
+      }
+    }
     mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-  }
-
-  plugins {
-    kotlin("multiplatform").version(extra["kotlin.version"] as String)
-    id("org.jetbrains.compose").version(extra["compose.version"] as String)
+    gradlePluginPortal()
   }
 }
 
-rootProject.name = "ComposeRockets"
+dependencyResolutionManagement {
+  repositories {
+    google {
+      mavenContent {
+        includeGroupAndSubgroups("androidx")
+        includeGroupAndSubgroups("com.android")
+        includeGroupAndSubgroups("com.google")
+      }
+    }
+    mavenCentral()
+  }
+}
 
-include(":common")
-include(":desktop")
-include(":web")
+//include(":common")
+//include(":desktop")
+//include(":web")
+include(":composeApp")
+
