@@ -57,10 +57,6 @@ class Rocket(
     fitness = fitness.coerceIn(0..100)
   }
 
-  private fun applyForce(force: Vector2) {
-    acceleration += force
-  }
-
   fun reset(x: Float, y: Float) {
     position = Vector2(x - (WIDTH / 2), y - HEIGHT)
     velocity *= 0
@@ -71,6 +67,10 @@ class Rocket(
 
   fun death() {
     isAlive = false
+  }
+
+  private fun applyForce(force: Vector2) {
+    acceleration += force
   }
 
   private companion object {

@@ -50,6 +50,17 @@ kotlin {
 
   jvm()
 
+  listOf(
+    iosX64(),
+    iosArm64(),
+    iosSimulatorArm64()
+  ).forEach {
+    it.binaries.framework {
+      baseName = "ComposeApp"
+      isStatic = true
+    }
+  }
+
   sourceSets {
     commonMain.dependencies {
       implementation(compose.runtime)
@@ -67,6 +78,9 @@ kotlin {
     androidMain.dependencies {
 //      implementation(compose.uiTooling)
       implementation(libs.androidx.activityCompose)
+    }
+
+    iosMain.dependencies {
     }
   }
 }

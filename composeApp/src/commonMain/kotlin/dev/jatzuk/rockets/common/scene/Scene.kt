@@ -40,7 +40,7 @@ class Scene(
   val population = Population(ROCKETS_SIZE, target, sceneHeight.toInt())
 
   private val _barriers = mutableListOf<Barrier>()
-  val barriers: List<Barrier> = _barriers
+  val barriers: List<Barrier> get() = _barriers
 
   val stats = Stats(population, _ticks)
 
@@ -77,27 +77,28 @@ class Scene(
 
     sceneJob = sceneScope.launch {
       while (isActive) {
-        if (resetCheck()) reset()
+        if (resetCheck()) {
+          reset()
+          continue
+        }
 
         population.rockets.forEach { rocket ->
           rocket.fly(_ticks.value)
 
           if (rocket.position.x < 0 || rocket.position.x > sceneWidth || rocket.position.y < 0 || rocket.position.y > sceneHeight) {
             rocket.death()
-            stats.update()
           }
 
           _barriers.forEach { barrier ->
             val isCollided = rocketBarrier(rocket, barrier)
             if (isCollided) {
               rocket.death()
-              stats.update()
             }
           }
         }
 
-        stats.update()
         tick()
+        stats.update()
         delay(TICK_RATIO)
       }
     }
@@ -118,11 +119,11 @@ class Scene(
     )
 
     population.evaluate()
-    stats.reset()
     population.selection()
 
     population.rockets.forEach { rocket -> rocket.reset(sceneWidth / 2, sceneHeight) }
     _ticks.value = 0
+    stats.reset()
   }
 
   private fun resetCheck(): Boolean {
