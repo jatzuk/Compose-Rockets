@@ -46,7 +46,6 @@ class Population(size: Int, target: Target, private val sceneHeight: Int) {
   }
 
   private companion object {
-
     const val PRESENCE_RATIO = 0.5f
   }
 }

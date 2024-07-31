@@ -1,11 +1,6 @@
 package dev.jatzuk.rockets.desktop
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import dev.jatzuk.rockets.common.Renderer
@@ -20,8 +15,8 @@ fun main() = application {
     resizable = false
   ) {
     val scene: Scene
-
-    with(Toolkit.getDefaultToolkit().screenSize) {
+    val toolkit = Toolkit.getDefaultToolkit()
+    with(toolkit.screenSize) {
       val sceneDimensions = SceneDimensions(width.toFloat(), height.toFloat())
 
       scene = Scene(sceneDimensions)
@@ -29,12 +24,7 @@ fun main() = application {
     }
 
     MaterialTheme {
-      Box(
-        modifier = Modifier.fillMaxSize()
-          .background(Color.Black)
-      ) {
-        Renderer(scene)
-      }
+      Renderer(scene)
     }
   }
 }

@@ -8,10 +8,11 @@ pluginManagement {
         includeGroupAndSubgroups("androidx")
         includeGroupAndSubgroups("com.android")
         includeGroupAndSubgroups("com.google")
+        includeGroupAndSubgroups("android")
       }
     }
-    mavenCentral()
     gradlePluginPortal()
+    mavenCentral()
   }
 }
 
@@ -21,6 +22,7 @@ dependencyResolutionManagement {
       mavenContent {
         includeGroupAndSubgroups("androidx")
         includeGroupAndSubgroups("com.android")
+        includeGroupAndSubgroups("com.android")
         includeGroupAndSubgroups("com.google")
       }
     }
@@ -28,8 +30,5 @@ dependencyResolutionManagement {
   }
 }
 
-//include(":common")
-//include(":desktop")
-//include(":web")
 include(":composeApp")
 

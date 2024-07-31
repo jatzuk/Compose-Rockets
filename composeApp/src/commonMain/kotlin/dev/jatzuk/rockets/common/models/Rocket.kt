@@ -29,9 +29,12 @@ class Rocket(
     private set
 
   fun fly(tick: Int) {
-    if (isTargetReached || !isAlive) return
+    if (isTargetReached || !isAlive) {
+      return
+    }
 
     applyForce(dna.genes[tick])
+
     velocity += acceleration
     position += velocity
     acceleration *= 0
@@ -39,7 +42,9 @@ class Rocket(
 
     _path.add(position)
 
-    if (distance(position, target.position) <= target.radius) isTargetReached = true
+    if (distance(position, target.position) <= target.radius) {
+      isTargetReached = true
+    }
   }
 
   fun calculateFitness() {
@@ -66,8 +71,7 @@ class Rocket(
   }
 
   companion object {
-
-    const val WIDTH = 40f
-    const val HEIGHT = WIDTH * 2
+    const val WIDTH = 100
+    const val HEIGHT = WIDTH
   }
 }

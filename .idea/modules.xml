@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/composeApp/ComposeRockets.composeApp.desktopMain.iml" filepath="$PROJECT_DIR$/.idea/modules/composeApp/ComposeRockets.composeApp.desktopMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/composeApp/ComposeRockets.composeApp.wasmJsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/composeApp/ComposeRockets.composeApp.wasmJsMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/composeApp/ComposeRockets.composeApp.androidMain.iml" filepath="$PROJECT_DIR$/.idea/modules/composeApp/ComposeRockets.composeApp.androidMain.iml" />
     </modules>
   </component>
 </project>
