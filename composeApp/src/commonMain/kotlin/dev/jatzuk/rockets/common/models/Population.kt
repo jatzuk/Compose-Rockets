@@ -24,7 +24,7 @@ class Population(size: Int, target: Target, private val sceneHeight: Int) {
         matingPool.add(rockets[i])
       }
 
-      val successors = rockets.filter { rocket -> rocket.isTargetReached }.count()
+      val successors = rockets.count { rocket -> rocket.isTargetReached }
       repeat(successors) {
         matingPool.add(rockets[i])
       }

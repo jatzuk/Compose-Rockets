@@ -20,5 +20,5 @@ fun rocketBarrier(rocket: Rocket, blockBarrier: Barrier): Boolean {
   val xDistance = rocket.position.x - xCheck
   val yDistance = rocket.position.y - yCheck
   val distance = sqrt((xDistance * xDistance) + (yDistance * yDistance))
-  return distance <= Rocket.WIDTH / 2
+  return distance <= rocket.width / 2
 }

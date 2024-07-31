@@ -11,6 +11,9 @@ class Rocket(
   private val sceneHeight: Int
 ) {
 
+  val width = WIDTH
+  val height = HEIGHT
+
   var position = Vector2()
     private set
 
@@ -70,7 +73,7 @@ class Rocket(
     isAlive = false
   }
 
-  companion object {
+  private companion object {
     const val WIDTH = 100
     const val HEIGHT = WIDTH
   }

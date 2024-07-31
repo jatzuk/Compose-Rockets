@@ -10,23 +10,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -47,21 +41,7 @@ import org.jetbrains.compose.resources.imageResource
 @Composable
 fun Renderer(scene: Scene) {
   val rocketImage = imageResource(Res.drawable.rocket)
-  val (rocketWidth, rocketHeight) = remember { Rocket.WIDTH to Rocket.HEIGHT }
-
-  val targetImage = imageResource(resource = Res.drawable.target)
-
-  val textMeasurer = rememberTextMeasurer()
-  val textStyle = TextStyle(
-    fontSize = 22.5.sp,
-    color = Color.White,
-  )
-
-  val textToDraw = "Compose Rockets!"
-
-  val textLayoutResult = remember(textToDraw) {
-    textMeasurer.measure(textToDraw, textStyle)
-  }
+  val targetImage = imageResource(Res.drawable.target)
 
   val ticks = scene.ticks.collectAsState()
   Canvas(
@@ -72,24 +52,35 @@ fun Renderer(scene: Scene) {
     drawTarget(scene.target, targetImage)
 
     scene.population.rockets.forEach { rocket ->
-      drawRocket(rocket, rocketImage, rocketWidth, rocketHeight, ticks.value)
+      drawRocket(rocket, rocketImage, ticks.value)
     }
 
     scene.barriers.forEach { barrier ->
-      drawBarrier(barrier, textMeasurer, textStyle, textLayoutResult)
+      drawBarrier(barrier)
     }
   }
 
   DrawStats(scene.stats)
 }
 
-private fun DrawScope.drawRocket(
-  rocket: Rocket,
-  image: ImageBitmap,
-  width: Int,
-  height: Int,
-  ticks: Int
-) {
+private fun DrawScope.drawTarget(target: Target, image: ImageBitmap) {
+  translate(target.position.x, target.position.y) {
+    drawImage(
+      image = image,
+      dstSize = IntSize(target.radius, target.radius),
+      dstOffset = IntOffset(-target.radius / 2, -target.radius / 2),
+    )
+
+    drawRect(
+      color = Color.Red,
+      topLeft = Offset(-target.radius / 2f, -target.radius / 2f),
+      size = Size(target.radius.toFloat(), target.radius.toFloat()),
+      style = Stroke(2f)
+    )
+  }
+}
+
+private fun DrawScope.drawRocket(rocket: Rocket, image: ImageBitmap, ticks: Int) {
   if (rocket.isAlive && ticks > -1) {
     translate(rocket.position.x, rocket.position.y) {
       rotate(
@@ -98,8 +89,15 @@ private fun DrawScope.drawRocket(
       ) {
         drawImage(
           image = image,
-          dstSize = IntSize(width, height),
-          dstOffset = IntOffset(-width / 2, -height / 2),
+          dstSize = IntSize(rocket.width, rocket.height),
+          dstOffset = IntOffset(-rocket.width / 2, -rocket.height / 2),
+        )
+
+        drawRect(
+          color = Color.Red,
+          topLeft = Offset(-rocket.width / 2f, -rocket.height / 2f),
+          size = Size(rocket.width.toFloat(), rocket.height.toFloat()),
+          style = Stroke(2f)
         )
       }
     }
@@ -124,38 +122,22 @@ private fun DrawScope.drawRocketPath(rocket: Rocket) {
   }
 }
 
-private fun DrawScope.drawBarrier(
-  barrier: Barrier,
-  textMeasurer: TextMeasurer,
-  style: TextStyle,
-  textLayoutResult: TextLayoutResult,
-) {
+private fun DrawScope.drawBarrier(barrier: Barrier) {
   translate(barrier.position.x, barrier.position.y) {
     when (barrier) {
       is BlockBarrier -> drawBlockBarrier(barrier)
-      is TextBarrier -> drawTextBarrier(barrier, textMeasurer, style, textLayoutResult)
+      is TextBarrier -> drawTextBarrier(barrier)
     }
   }
 }
 
-private fun DrawScope.drawTextBarrier(
-  barrier: TextBarrier,
-  textMeasurer: TextMeasurer,
-  style: TextStyle,
-  textLayoutResult: TextLayoutResult,
-) {
-
+private fun DrawScope.drawTextBarrier(barrier: TextBarrier) {
   drawRect(
     color = Color.Red,
     size = Size(barrier.width.toFloat(), barrier.height.toFloat())
   )
 
-  drawText(
-    textLayoutResult = textLayoutResult,
-//    textMeasurer = textMeasurer,
-//    text = barrier.text,
-//    style = style,
-  )
+  drawText(textLayoutResult = barrier.text)
 }
 
 private fun DrawScope.drawBlockBarrier(barrier: BlockBarrier) {
@@ -164,19 +146,6 @@ private fun DrawScope.drawBlockBarrier(barrier: BlockBarrier) {
     style = Stroke(width = 1f),
     size = Size(barrier.width.toFloat(), barrier.height.toFloat())
   )
-}
-
-private fun DrawScope.drawTarget(target: Target, image: ImageBitmap) {
-  translate(target.position.x - target.radius / 2, target.position.y - target.radius / 2) {
-    drawIntoCanvas { canvas ->
-      canvas.drawImageRect(
-        image = image,
-        dstSize = IntSize(target.radius.toInt() * 2, target.radius.toInt() * 2),
-        dstOffset = IntOffset(-target.radius.toInt() / 2, -target.radius.toInt() / 2),
-        paint = Paint()
-      )
-    }
-  }
 }
 
 @Composable
@@ -193,7 +162,7 @@ private fun DrawStats(stats: Stats) {
     DisplayAverageFitness(stats.averageFitness)
     DisplayAliveCount(stats.aliveRockets)
     DisplayDeathCount(stats.deathRockets)
-    DisplayPopulation(stats.populationCount)
+    DisplayGeneration(stats.generationCount)
   }
 }
 
@@ -234,8 +203,8 @@ private fun DisplayDeathCount(count: Int) {
 }
 
 @Composable
-private fun DisplayPopulation(count: Int) {
-  DrawText("population #$count")
+private fun DisplayGeneration(count: Int) {
+  DrawText("generation #$count")
 }
 
 @Composable

@@ -34,7 +34,7 @@ class Scene(
   private val _ticks = MutableStateFlow(0)
   val ticks = _ticks.asStateFlow()
 
-  var target = Target(Vector2())
+  var target = Target(Vector2(sceneWidth / 2f, getTargetYPosition()))
     private set
 
   val population = Population(ROCKETS_SIZE, target, sceneHeight.toInt())
@@ -61,7 +61,7 @@ class Scene(
     _barriers.add(
       TextBarrier(
         text = textLayoutResult,
-        position = Vector2((sceneWidth / 2) - (textLayoutResult.size.width / 2), sceneHeight * 0.2f)
+        position = Vector2((sceneWidth / 2) - (textLayoutResult.size.width / 2), getBarrierYPosition())
       )
     )
 
@@ -70,6 +70,11 @@ class Scene(
   }
 
   private fun start() {
+    val existingJob = sceneJob
+    if (existingJob != null && existingJob.isActive) {
+      return
+    }
+
     sceneJob = sceneScope.launch {
       while (isActive) {
         if (resetCheck()) reset()
@@ -109,7 +114,7 @@ class Scene(
 
   private fun reset() {
     target = target.copy(
-      position = Vector2(sceneWidth / 2, sceneHeight * 0.1f)
+      position = Vector2(sceneWidth / 2, getTargetYPosition())
     )
 
     population.evaluate()
@@ -124,6 +129,10 @@ class Scene(
     return _ticks.value >= GAME_TICKS_LIMIT - 1 ||
       population.rockets.all { rocket -> !rocket.isAlive || rocket.isTargetReached }
   }
+
+  private fun getTargetYPosition(): Float = sceneHeight * 0.2f
+
+  private fun getBarrierYPosition(): Float = sceneHeight * 0.4f
 
   companion object {
     const val ROCKETS_SIZE = 25

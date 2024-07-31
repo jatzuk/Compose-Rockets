@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class Stats(private val population: Population, val ticks: StateFlow<Int>) {
 
-  var populationCount = 0
+  var generationCount = 0
     private set
 
   var reachedTarget = 0
@@ -31,7 +31,7 @@ class Stats(private val population: Population, val ticks: StateFlow<Int>) {
     deathRockets = 0
     reachedTarget = 0
 
-    populationCount++
+    generationCount++
   }
 
   fun update() {
