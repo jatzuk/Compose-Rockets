@@ -67,14 +67,14 @@ private fun DrawScope.drawTarget(target: Target, image: ImageBitmap) {
   translate(target.position.x, target.position.y) {
     drawImage(
       image = image,
-      dstSize = IntSize(target.radius, target.radius),
-      dstOffset = IntOffset(-target.radius / 2, -target.radius / 2),
+      dstSize = IntSize(target.visualRadius, target.visualRadius),
+      dstOffset = IntOffset(-target.visualRadius / 2, -target.visualRadius / 2),
     )
 
     drawRect(
       color = Color.Red,
-      topLeft = Offset(-target.radius / 2f, -target.radius / 2f),
-      size = Size(target.radius.toFloat(), target.radius.toFloat()),
+      topLeft = Offset(-target.visualRadius / 2f, -target.visualRadius / 2f),
+      size = Size(target.visualRadius.toFloat(), target.visualRadius.toFloat()),
       style = Stroke(2f)
     )
   }
@@ -134,16 +134,21 @@ private fun DrawScope.drawBarrier(barrier: Barrier) {
 private fun DrawScope.drawTextBarrier(barrier: TextBarrier) {
   drawRect(
     color = Color.Red,
+    topLeft = Offset(-barrier.width / 2f, -barrier.height / 2f),
     size = Size(barrier.width.toFloat(), barrier.height.toFloat())
   )
 
-  drawText(textLayoutResult = barrier.text)
+  drawText(
+    textLayoutResult = barrier.text,
+    topLeft = Offset(-barrier.text.size.width / 2f, -barrier.text.size.height / 2f)
+  )
 }
 
 private fun DrawScope.drawBlockBarrier(barrier: BlockBarrier) {
   drawRect(
     color = barrier.color,
     style = Stroke(width = 1f),
+    topLeft = Offset(-barrier.width / 2f, -barrier.height / 2f),
     size = Size(barrier.width.toFloat(), barrier.height.toFloat())
   )
 }

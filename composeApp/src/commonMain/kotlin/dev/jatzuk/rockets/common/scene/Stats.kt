@@ -23,9 +23,9 @@ class Stats(private val population: Population, val ticks: StateFlow<Int>) {
   var deathRockets = 0
     private set
 
-  fun reset() {
-    bestFitness = population.rockets.maxOf { rocket -> rocket.fitness }
-    averageFitness = population.rockets.sumOf { rocket -> rocket.fitness } / population.rockets.size
+  fun reset(bestFitness: Int, averageFitness: Int) {
+    this.bestFitness = bestFitness
+    this.averageFitness = averageFitness
 
     aliveRockets = population.rockets.size
     deathRockets = 0

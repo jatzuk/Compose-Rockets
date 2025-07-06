@@ -5,10 +5,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import dev.jatzuk.rockets.common.math.Vector2
 import dev.jatzuk.rockets.common.math.rocketBarrier
 import dev.jatzuk.rockets.common.models.Population
+import dev.jatzuk.rockets.common.models.Rocket
 import dev.jatzuk.rockets.common.models.Target
 import dev.jatzuk.rockets.common.models.barriers.Barrier
 import dev.jatzuk.rockets.common.models.barriers.TextBarrier
@@ -34,10 +36,15 @@ class Scene(
   private val _ticks = MutableStateFlow(0)
   val ticks = _ticks.asStateFlow()
 
-  var target = Target(Vector2(sceneWidth / 2f, getTargetYPosition()))
+  var target = Target(
+    Vector2(sceneWidth / 2f, getTargetYPosition()),
+    sceneWidth,
+    sceneHeight,
+    Rocket.SIZE
+  )
     private set
 
-  val population = Population(ROCKETS_SIZE, target, sceneHeight.toInt())
+  val population = Population(ROCKETS_SIZE, target, sceneWidth.toInt(), sceneHeight.toInt())
 
   private val _barriers = mutableListOf<Barrier>()
   val barriers: List<Barrier> get() = _barriers
@@ -50,6 +57,7 @@ class Scene(
     val textStyle = TextStyle(
       fontSize = 22.5.sp,
       color = Color.White,
+      textAlign = TextAlign.Center
     )
 
     val textToDraw = "Compose Rockets!"
@@ -61,7 +69,7 @@ class Scene(
     _barriers.add(
       TextBarrier(
         text = textLayoutResult,
-        position = Vector2((sceneWidth / 2) - (textLayoutResult.size.width / 2), getBarrierYPosition())
+        position = Vector2(sceneWidth / 2, getBarrierYPosition())
       )
     )
 
@@ -85,7 +93,7 @@ class Scene(
         population.rockets.forEach { rocket ->
           rocket.fly(_ticks.value)
 
-          if (rocket.position.x < 0 || rocket.position.x > sceneWidth || rocket.position.y < 0 || rocket.position.y > sceneHeight) {
+          if (!rocket.isInsideScene()) {
             rocket.death()
           }
 
@@ -118,12 +126,12 @@ class Scene(
       position = Vector2(sceneWidth / 2, getTargetYPosition())
     )
 
-    population.evaluate()
+    val (maxFitness, avgFitness) = population.evaluate()
     population.selection()
 
-    population.rockets.forEach { rocket -> rocket.reset(sceneWidth / 2, sceneHeight) }
+    population.rockets.forEach { rocket -> rocket.reset(sceneWidth / 2, sceneHeight - Rocket.SIZE) }
     _ticks.value = 0
-    stats.reset()
+    stats.reset(maxFitness, avgFitness)
   }
 
   private fun resetCheck(): Boolean {
@@ -137,7 +145,7 @@ class Scene(
 
   companion object {
     const val ROCKETS_SIZE = 25
-    const val GAME_TICKS_LIMIT = 400
+    const val GAME_TICKS_LIMIT = 450
     const val TICK_RATIO = 1_000L / 60
   }
 }

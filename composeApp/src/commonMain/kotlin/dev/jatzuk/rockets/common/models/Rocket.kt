@@ -8,11 +8,12 @@ import dev.jatzuk.rockets.common.scene.Scene
 class Rocket(
   val target: Target,
   val dna: DNA = DNA(Scene.GAME_TICKS_LIMIT),
-  private val sceneHeight: Int
+  private val sceneWidth: Int,
+  private val sceneHeight: Int,
 ) {
 
-  val width = WIDTH
-  val height = HEIGHT
+  val width = SIZE
+  val height = SIZE
 
   var position = Vector2()
     private set
@@ -45,20 +46,34 @@ class Rocket(
 
     _path.add(position)
 
-    if (distance(position, target.position) <= target.radius) {
+    if (distance(position, target.position) < target.radius) {
       isTargetReached = true
     }
   }
 
+  fun isInsideScene(): Boolean {
+    val halfWidth = width / 2
+    val halfHeight = height / 2
+
+    return position.x - halfWidth >= 0 &&
+      position.x + halfWidth <= sceneWidth &&
+      position.y - halfHeight >= 0 &&
+      position.y + halfHeight <= sceneHeight
+  }
+
   fun calculateFitness() {
     fitness = map(distance(position, target.position).toInt(), sceneHeight..0, 0..100)
-    if (isTargetReached) fitness += 10
-    if (!isAlive) fitness = 0
+    if (!isAlive) {
+      fitness = 0
+    }
+    if (isTargetReached) {
+      fitness += 15
+    }
     fitness = fitness.coerceIn(0..100)
   }
 
   fun reset(x: Float, y: Float) {
-    position = Vector2(x - (WIDTH / 2), y - HEIGHT)
+    position = Vector2(x, y)
     velocity *= 0
     isAlive = true
     isTargetReached = false
@@ -73,8 +88,7 @@ class Rocket(
     acceleration += force
   }
 
-  private companion object {
-    const val WIDTH = 100
-    const val HEIGHT = WIDTH
+  companion object {
+    const val SIZE = 100
   }
 }

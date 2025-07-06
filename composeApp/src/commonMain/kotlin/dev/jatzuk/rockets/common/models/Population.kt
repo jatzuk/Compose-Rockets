@@ -1,19 +1,26 @@
 package dev.jatzuk.rockets.common.models
 
-class Population(size: Int, target: Target, private val sceneHeight: Int) {
+class Population(size: Int, target: Target, private val sceneWidth: Int, private val sceneHeight: Int) {
 
-  private var _rockets = MutableList(size) { Rocket(target, sceneHeight = sceneHeight) }
+  private var _rockets = MutableList(size) { Rocket(target, sceneWidth = sceneWidth, sceneHeight = sceneHeight) }
   val rockets get() = _rockets.toList()
 
   private val matingPool = mutableListOf<Rocket>()
 
-  fun evaluate() {
+  fun evaluate(): Pair<Int, Int> {
     var maxFitness = 0
+    var avgFitness = 0
 
     rockets.forEach { rocket ->
       rocket.calculateFitness()
-      if (rocket.fitness > maxFitness) maxFitness = rocket.fitness
+      avgFitness += rocket.fitness
+
+      if (rocket.fitness > maxFitness) {
+        maxFitness = rocket.fitness
+      }
     }
+
+    avgFitness /= rockets.size
 
     matingPool.clear()
     for (i in rockets.indices) {
@@ -29,6 +36,8 @@ class Population(size: Int, target: Target, private val sceneHeight: Int) {
         matingPool.add(rockets[i])
       }
     }
+
+    return maxFitness to avgFitness
   }
 
   fun selection() {
@@ -40,7 +49,7 @@ class Population(size: Int, target: Target, private val sceneHeight: Int) {
       val secondParent = matingPool.random().dna
 
       val child = firstParent.crossover(secondParent)
-      newRockets.add(Rocket(rockets[i].target, child, sceneHeight))
+      newRockets.add(Rocket(rockets[i].target, child, sceneWidth, sceneHeight))
     }
     _rockets = newRockets
   }
